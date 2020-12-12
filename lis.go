@@ -9,16 +9,27 @@ type Dyp struct {
 func NewDyp(in []int) *Dyp {
 	nums := make([]int, len(in))
 	copy(nums, in)
-	dp := make([]int, 0)
-	dp = append(dp, in[0])
 	return &Dyp{
 		nums: nums,
-		dp:   dp,
+	}
+}
+
+func (d *Dyp) _Init(mode string) {
+	switch mode {
+	case "LIS":
+		//Both len and cap shall be initialized in case of addtional allocs
+		d.dp = make([]int, 1, len(d.nums))
+		d.dp[0] = d.nums[0]
+	case "LISdynamic":
+		d.dp = make([]int, len(d.nums))
+	default:
+		panic("Invalid LIS method")
 	}
 }
 
 // LIS binary search
 func (d *Dyp) LIS() int {
+	d._Init("LIS")
 	for _, v := range d.nums {
 		if v > d.dp[len(d.dp)-1] {
 			d.dp = append(d.dp, v)
@@ -33,7 +44,7 @@ func (d *Dyp) LIS() int {
 
 //LISdynamic dynamic process
 func (d *Dyp) LISdynamic() int {
-	d.dp = make([]int, len(d.nums))
+	d._Init("LISdynamic")
 	for idx := range d.dp {
 		d.dp[idx] = 1
 	}

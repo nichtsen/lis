@@ -1,9 +1,8 @@
 package lis
 
 type Dyp struct {
-	nums     []int
-	dp       []int
-	longtest int
+	nums []int
+	dp   []int
 }
 
 func NewDyp(in []int) *Dyp {

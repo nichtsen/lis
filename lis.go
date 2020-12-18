@@ -26,6 +26,10 @@ func (d *Dyp) _Init(mode string) {
 	}
 }
 
+func (d *Dyp) Set(num []int) {
+	copy(d.nums, num)
+}
+
 // LIS binary search
 func (d *Dyp) LIS() int {
 	d._Init("LIS")
@@ -67,9 +71,21 @@ func (d *Dyp) binaryUpdate(a int) {
 		mid := len(s) / 2
 		if a > s[mid] {
 			s = s[mid+1:]
+			if len(s) == 1 {
+				s[0] = a
+				return
+			}
 		} else {
+			if mid == 1 {
+				if s[0] >= a {
+					s[0] = a
+					return
+				}
+				s[1] = a
+				return
+
+			}
 			s = s[:mid]
 		}
 	}
-	s[0] = a
 }

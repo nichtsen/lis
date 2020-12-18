@@ -10,9 +10,12 @@ func Example_lis() {
 	ans := dyp.LIS()
 	fmt.Printf("%v", ans)
 	len := dyp.LISdynamic()
-	fmt.Println(len)
+	fmt.Printf("%v", len)
+	dyp.Set([]int{5, 7, 8, 1, 2, 3, 4})
+	ans = dyp.LIS()
+	fmt.Printf("%v", ans)
 	// Output:
-	// 44
+	// 444
 }
 
 func BenchmarkLIS(b *testing.B) {

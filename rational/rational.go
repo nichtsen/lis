@@ -74,3 +74,8 @@ func Divide(a Num, b Num) Num {
 	check(a, b)
 	return New(a.Numerator()*b.Denominator(), a.Denominator()/b.Numerator())
 }
+
+// Equal TODO
+func Equal(a Num, b Num) bool {
+	return false
+}

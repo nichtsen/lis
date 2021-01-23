@@ -7,4 +7,4 @@ Implementing some of examples in the book
 in golang
 
 # document
-godoc[https://godoc.org/github.com/nichtsen/lis]
+[godoc](https://godoc.org/github.com/nichtsen/lis)

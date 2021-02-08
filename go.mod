@@ -1,3 +1,3 @@
-module github/nichtsen/lis
+module github.com/nichtsen/lis
 
 go 1.15

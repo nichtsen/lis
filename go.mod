@@ -1,3 +1,3 @@
-module lis
+module github/nichtsen/lis
 
-go 1.14
+go 1.15

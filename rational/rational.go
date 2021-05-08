@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// Num interface of a retional number
+// Num interface of a rational number
 type Num interface {
 	Numerator() int
 	Denominator() int

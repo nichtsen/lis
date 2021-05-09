@@ -16,7 +16,12 @@ of bytes
 | ---- |---- |
 |A|8|
 |B|3|
-
+|C|1|
+|D|1|
+|E|1|
+|E|1|
+|G|1|
+|H|1|
 ```shell
 root: --Huffman Node(symbol: [B C D G H E F A], weight: 17, 
  -->left node(--Huffman Leaf(symbol: [A], weight: 8)) -->right node(--Huffman Node(symbol: [B C D G H E F], weight: 9, 

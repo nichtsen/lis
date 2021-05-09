@@ -11,8 +11,9 @@ of bytes
 
 ## example
 > input data
-|code | frequency|
-|----|----|
+
+| code | frequency |
+| ---- |---- |
 |A|8|
 |B|3|
 

@@ -10,6 +10,12 @@ we represent the bit stream as sequense of bytes which is 8 bit long AKA. unint8
 of bytes
 
 ## example
+> input data
+|code | frequency|
+|----|----|
+|A|8|
+|B|3|
+
 ```shell
 root: --Huffman Node(symbol: [B C D G H E F A], weight: 17, 
  -->left node(--Huffman Leaf(symbol: [A], weight: 8)) -->right node(--Huffman Node(symbol: [B C D G H E F], weight: 9, 

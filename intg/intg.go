@@ -1,5 +1,7 @@
 package intg
 
+import "fmt"
+
 type Iterator func() (float64, Iterator)
 
 func (it Iterator) Ref(n int) float64 {
@@ -8,6 +10,38 @@ func (it Iterator) Ref(n int) float64 {
 	}
 	res, _ := it()
 	return res
+}
+
+func (it Iterator) PrintN(n int) {
+	res := make([]float64, n)
+	for i := 0; i < n; i++ {
+		var val float64
+		val, it = it()
+		res[i] = val
+	}
+	fmt.Println(res)
+}
+
+func (it Iterator) Scale(multiply float64) Iterator {
+	return func() (float64, Iterator) {
+		val, next := it()
+		return val * multiply, next.Scale(multiply)
+	}
+}
+
+func (it Iterator) Add(it2 Iterator) Iterator {
+	return func() (float64, Iterator) {
+		val1, next1 := it()
+		val2, next2 := it2()
+		return val1 + val2, next1.Add(next2)
+	}
+}
+
+func (it Iterator) Map(f func(float64) float64) Iterator {
+	return func() (float64, Iterator) {
+		val, next := it()
+		return f(val), next.Map(f)
+	}
 }
 
 func Integral(integrand Iterator, initial float64, dt float64) Iterator {
@@ -60,14 +94,65 @@ func Solve(f func(float64) float64, initial, dt float64) Iterator {
 	fy := &Delay{}
 	// delay the fy until it get feedback from y
 	y := IntegralDelay(fy.Delay, initial, dt)
-	fy.call = mapy(y, f)
+	fy.call = y.Map(f)
 	return y
 }
 
-func mapy(y Iterator, f func(float64) float64) Iterator {
+func IntegralDelay2(integrandDelay func() Iterator, initial float64, dt float64) Iterator {
 	return func() (float64, Iterator) {
-		res, next := y()
-		// fmt.Println(res)
-		return f(res), mapy(next, f)
+		return initial, func() Iterator {
+			integrand := integrandDelay()
+			integrand = integrand.Scale(dt)
+			integrand = integrand.Add(IntegralDelay2(integrandDelay, initial, dt))
+			return integrand
+		}()
 	}
+}
+
+func Solve2(f func(float64) float64, initial, dt float64) Iterator {
+	var fy Iterator
+	var delayFY = func() Iterator {
+		return fy
+	}
+	// delay the fy until it get feedback from y
+	y := IntegralDelay2(delayFY, initial, dt)
+	fy = y.Map(f)
+	return y
+}
+
+func IntegralDelay3(dp []float64, integrandDelay func() Iterator, initial float64, dt float64) Iterator {
+	return func() (float64, Iterator) {
+		return dp[0], func() Iterator {
+			integrand := integrandDelay()
+			return dpIter(dp[0], dp[1:], integrand, dt)
+		}()
+	}
+}
+
+func dpIter(prev float64, dp []float64, fy Iterator, dt float64) Iterator {
+	return func() (float64, Iterator) {
+		val, next := fy()
+		dp[0] = prev + val*dt
+		return dp[0], dpIter(dp[0], dp[1:], next, dt)
+	}
+}
+
+// Memorization instead of computing from scratch
+func FyMem(dp []float64, f func(float64) float64) Iterator {
+	return func() (float64, Iterator) {
+		return f(dp[0]), FyMem(dp[1:], f)
+	}
+}
+
+func Solve3(f func(float64) float64, initial, dt float64) Iterator {
+	var fy Iterator
+	var delayFY = func() Iterator {
+		return fy
+	}
+	dp := make([]float64, 1024*1024)
+	dp[0] = initial
+	// delay the fy until it get feedback from y
+	y := IntegralDelay3(dp, delayFY, initial, dt)
+	fy = FyMem(dp, f)
+	return y
 }

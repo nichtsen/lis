@@ -39,8 +39,14 @@ func TestE(t *testing.T) {
 	// with inital value of e^0 = 1
 	var initial float64 = 1
 	dt := 0.001
-	res := Solve(f, initial, dt)
-	res()
+	var iter Iterator
+	var res float64
+	iter = Solve(f, initial, dt)
+	for i := 0; i < 1000; i++ {
+		_, iter = iter()
+	}
+	res, _ = iter()
+	fmt.Println(res)
 }
 
 func iteration(prev float64, dt float64) (float64, Iterator) {

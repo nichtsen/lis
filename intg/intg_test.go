@@ -16,12 +16,8 @@ func TestIntegral(t *testing.T) {
 		}
 	}
 	intg := Integral(iter, 0, dt)
-	var cur Iterator
-	cur = intg
-	for i := 0; i < 1000; i++ {
-		_, cur = cur()
-	}
-	res, _ := cur()
+	cur := intg
+	res := cur.Ref(1000)
 	expected := 0.5
 	diff := math.Abs(res - expected)
 	fmt.Println(diff)
@@ -42,10 +38,7 @@ func TestE(t *testing.T) {
 	var iter Iterator
 	var res float64
 	iter = Solve(f, initial, dt)
-	for i := 0; i < 1000; i++ {
-		_, iter = iter()
-	}
-	res, _ = iter()
+	res = iter.Ref(1000)
 	fmt.Println(res)
 }
 

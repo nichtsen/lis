@@ -2,6 +2,14 @@ package intg
 
 type Iterator func() (float64, Iterator)
 
+func (it Iterator) Ref(n int) float64 {
+	for i := 0; i < n; i++ {
+		_, it = it()
+	}
+	res, _ := it()
+	return res
+}
+
 func Integral(integrand Iterator, initial float64, dt float64) Iterator {
 	return func() (float64, Iterator) {
 		return initial, integral(initial, integrand, dt)

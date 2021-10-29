@@ -131,3 +131,26 @@ func TestSolve3(t *testing.T) {
 	res = iter.Ref(1000)
 	fmt.Println(res)
 }
+
+func BenchmarkSolve(b *testing.B) {
+	// if y = e^x then dy/dt = f(y) = y
+	f := func(y float64) float64 {
+		return y
+	}
+	// with inital value of e^0 = 1
+	var initial float64 = 1
+	dt := 0.05
+	// bottleneck is addressed by Ref
+	b.Run("BS2", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			iter := Solve2(f, initial, dt)
+			iter.Ref(20)
+		}
+	})
+	b.Run("BS3", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			iter := Solve3(f, initial, dt)
+			iter.Ref(20)
+		}
+	})
+}

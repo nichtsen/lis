@@ -35,24 +35,62 @@ func (r *Register) Key() string {
 	return r.key
 }
 
+type Stack interface {
+	Save(r IRegister)
+	Restore(r IRegister)
+	Init()
+	Empty() bool
+}
+
 // Stack container of registers
-type Stack struct {
+type lStack struct {
 	stack *list.List
 }
 
-func (s *Stack) Save(r *IRegister) {
+func (s *lStack) Save(r IRegister) {
 	s.stack.PushBack(r)
 }
 
-func (s *Stack) Restore() *IRegister {
+func (s *lStack) Restore() IRegister {
 	e := s.stack.Front()
-	return e.Value.(*IRegister)
+	return e.Value.(IRegister)
+}
+
+type mStack struct {
+	ePointer interface{}
+}
+
+func (s *mStack) Save(r IRegister) {
+	s.ePointer = Cons(r.Get(), s.ePointer)
+}
+
+func (s *mStack) Restore(r IRegister) {
+	val := Car(s.ePointer)
+	defer func() {
+		s.ePointer = Cdr(s.ePointer)
+	}()
+	r.Set(val)
+}
+
+func (s *mStack) Init() {
+	s.ePointer = Empty
+}
+
+func (s *mStack) Empty() bool {
+	_, ok := s.ePointer.(emptyPtr)
+	return ok
+}
+
+func NewStack() Stack {
+	s := &mStack{}
+	s.Init()
+	return s
 }
 
 // Machine is capable of executing a sequence of instructions
 type Machine struct {
 	registers map[string]IRegister
-	stack     *list.List
+	stack     Stack
 	inst      []*Instruction
 	pc        []*Instruction
 	ops       map[string]func(...interface{}) interface{}
@@ -60,10 +98,9 @@ type Machine struct {
 
 func NewMachine(regs []string, text [][]string, ops map[string]func(...interface{}) interface{}) *Machine {
 	m := &Machine{
-		stack: list.New(),
-		pc:    make([]*Instruction, 0),
-		inst:  make([]*Instruction, 0),
-		ops:   ops,
+		pc:   make([]*Instruction, 0),
+		inst: make([]*Instruction, 0),
+		ops:  ops,
 	}
 	regTab := make(map[string]IRegister)
 	for _, r := range regs {

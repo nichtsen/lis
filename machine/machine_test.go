@@ -22,3 +22,19 @@ func TestMachine(t *testing.T) {
 	m.Start()
 	fmt.Print(m.GetRegisterContent("c"))
 }
+
+func TestStack(t *testing.T) {
+	s := NewStack()
+	r := NewRegister("r")
+	r.Set(1)
+	s.Save(r)
+	r.Set(2)
+	s.Save(r)
+	r.Set(3)
+	s.Save(r)
+	r.Set("end")
+	for !s.Empty() {
+		s.Restore(r)
+		fmt.Println(r.Get().(int))
+	}
+}

@@ -1,10 +1,9 @@
 # lis
-lis
+Exercises of SCIP, MIT 1984
 
 # Remark
-Implementing some of examples in the book 
+Practicing and make my hand dirty during reading the book 
 `Structure and Interpretation of Computer Programs`
-in golang
 
 # document
 [godoc](https://godoc.org/github.com/nichtsen/lis)

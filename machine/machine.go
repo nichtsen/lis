@@ -91,23 +91,25 @@ func NewStack() Stack {
 type Machine struct {
 	registers map[string]IRegister
 	stack     Stack
-	inst      []*Instruction
+	flag      IRegister
+	insts     []*Instruction
 	pc        []*Instruction
 	ops       map[string]func(...interface{}) interface{}
 }
 
 func NewMachine(regs []string, text [][]string, ops map[string]func(...interface{}) interface{}) *Machine {
 	m := &Machine{
-		pc:   make([]*Instruction, 0),
-		inst: make([]*Instruction, 0),
-		ops:  ops,
+		pc:    make([]*Instruction, 0),
+		insts: make([]*Instruction, 0),
+		ops:   ops,
+		flag:  NewRegister("flag"),
 	}
 	regTab := make(map[string]IRegister)
 	for _, r := range regs {
 		regTab[r] = NewRegister(r)
 	}
 	m.registers = regTab
-	m.inst = m.assemble(text)
+	m.insts = m.assemble(text)
 	return m
 }
 
@@ -147,45 +149,46 @@ func (m *Machine) assemble(text [][]string) []*Instruction {
 	return extractLabels(text, m.updateInstruct)
 }
 
-func extractLabels(text [][]string, handler func([]*Instruction, map[string][]*Instruction) []*Instruction) []*Instruction {
+func extractLabels(text [][]string, handler func([]*Instruction, map[Label][]*Instruction) []*Instruction) []*Instruction {
 	// exit of recursion
 	if len(text) == 0 {
-		return handler(make([]*Instruction, 0), make(map[string][]*Instruction))
+		return handler(make([]*Instruction, 0), make(map[Label][]*Instruction))
 	}
 
-	cur := text[len(text)-1]
+	cur := text[0]
 
-	rest := text[:len(text)-1]
+	rest := text[1:]
 	// label
 	if len(cur) == 1 {
 		return extractLabels(rest,
-			func(insts []*Instruction, labels map[string][]*Instruction) []*Instruction {
-				labels[cur[0]] = insts
+			func(insts []*Instruction, labels map[Label][]*Instruction) []*Instruction {
+				labels[Label(cur[0])] = insts
 				return handler(insts, labels)
 			})
 	} else {
 		return extractLabels(rest,
-			func(insts []*Instruction, labels map[string][]*Instruction) []*Instruction {
+			func(insts []*Instruction, labels map[Label][]*Instruction) []*Instruction {
 				return handler(append(insts, NewInstruction(cur)), labels)
 			})
 	}
 }
 
-func (m *Machine) updateInstruct(insts []*Instruction, labels map[string][]*Instruction) []*Instruction {
+func (m *Machine) updateInstruct(insts []*Instruction, labels map[Label][]*Instruction) []*Instruction {
 	for _, inst := range insts {
 		inst.SetProc(m.makeProc(inst, labels))
 	}
 	return insts
 }
 
-func (m *Machine) makeProc(inst *Instruction, labels map[string][]*Instruction) func() {
-	switch inst.Tag() {
-	case "assign":
-		args := inst.Rest()
+func (m *Machine) makeProc(inst *Instruction, labels map[Label][]*Instruction) func() {
+	expr := inst.Expr()
+	switch {
+	case AssignExpr(expr):
+		args := expr.Rest()
 		target := m.GetRegister(args[0])
 		args = args.Rest()
 		var valProc func() interface{}
-		if args.Tag() == "op" {
+		if OpExpr(args) {
 			valProc = m.makeOperation(args)
 
 		} else {
@@ -193,10 +196,80 @@ func (m *Machine) makeProc(inst *Instruction, labels map[string][]*Instruction) 
 		}
 		return func() {
 			target.Set(valProc())
+			m.AdvancePc()
 		}
+	case TestExpr(expr):
+		args := expr.Rest()
+		valProc := m.makeOperation(args)
+		return func() {
+			m.flag.Set(valProc())
+			m.AdvancePc()
+		}
+	case BranchExpr(expr):
+		return m.makeBranch(expr, labels)
+	case GotoExpr(expr):
+		return m.makeGoto(expr, labels)
 	default:
 		panic("invalid expression")
 	}
+}
+
+func (m *Machine) makeGoto(expr Expression, labelTab map[Label][]*Instruction) func() {
+	args := expr.Rest()
+	if LabelExpr(args) {
+		args = args.Rest()
+		label := Label(args[0])
+		if insts, ok := labelTab[label]; ok {
+			return func() {
+				m.pc = insts
+			}
+		}
+		panic("invalid label")
+	}
+	if RegExpr(args) {
+		args = args.Rest()
+		reg := m.GetRegister(args[0])
+		content := reg.Get()
+		label, ok := content.(Label)
+		if !ok {
+			panic("register's content is not a label")
+		}
+		if insts, ok := labelTab[label]; ok {
+			return func() {
+				m.pc = insts
+			}
+		}
+		panic("invalid label in register")
+	}
+	panic("invalid goto expression ")
+}
+
+func (m *Machine) makeBranch(expr Expression, labelTab map[Label][]*Instruction) func() {
+	args := expr.Rest()
+	if LabelExpr(args) {
+		args = args.Rest()
+		label := Label(args[0])
+		insts, ok := labelTab[label]
+		if !ok {
+			panic("invalid label")
+		}
+
+		return func() {
+			content := m.flag.Get()
+			flag, ok := content.(bool)
+			if !ok {
+				panic("flag register's content is not a boolean value")
+			}
+			if !flag {
+				// double times advancing
+				m.AdvancePc()
+				m.AdvancePc()
+				return
+			}
+			m.pc = insts
+		}
+	}
+	panic("invalid branch expression ")
 }
 
 func (m *Machine) makeOperation(expr Expression) func() interface{} {
@@ -222,30 +295,33 @@ func (m *Machine) makePrimitiveExpr(expr Expression) func() interface{} {
 			n, _ := strconv.Atoi(expr[1])
 			return n
 		}
+	case "string":
+		return func() interface{} {
+			return expr[1]
+		}
 	case "reg":
 		return func() interface{} {
 			return m.GetRegisterContent(expr[1])
 		}
 	default:
-		return nil
+		panic("invalid primitive expression")
 	}
 }
 
 func (m *Machine) AdvancePc() {
-	m.pc = m.pc[1:]
+	m.pc = m.pc[:len(m.pc)-1]
 }
 
 func (m *Machine) Excute() {
 	insts := m.pc
-	insts[0].Run()
-	if len(insts) == 1 {
+	if len(insts) == 0 {
 		return
 	}
-	m.AdvancePc()
+	insts[len(insts)-1].Run()
 	m.Excute()
 }
 
 func (m *Machine) Start() {
-	m.pc = m.inst
+	m.pc = m.insts
 	m.Excute()
 }

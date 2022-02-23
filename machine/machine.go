@@ -261,8 +261,6 @@ func (m *Machine) makeBranch(expr Expression, labelTab map[Label][]*Instruction)
 				panic("flag register's content is not a boolean value")
 			}
 			if !flag {
-				// double times advancing
-				m.AdvancePc()
 				m.AdvancePc()
 				return
 			}

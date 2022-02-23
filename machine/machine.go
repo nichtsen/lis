@@ -229,17 +229,18 @@ func (m *Machine) makeGoto(expr Expression, labelTab map[Label][]*Instruction) f
 	if RegExpr(args) {
 		args = args.Rest()
 		reg := m.GetRegister(args[0])
-		content := reg.Get()
-		label, ok := content.(Label)
-		if !ok {
-			panic("register's content is not a label")
-		}
-		if insts, ok := labelTab[label]; ok {
-			return func() {
-				m.pc = insts
+		return func() {
+			content := reg.Get()
+			label, ok := content.(Label)
+			if !ok {
+				panic("register's content is not a label")
 			}
+			if insts, ok := labelTab[label]; ok {
+				m.pc = insts
+				return
+			}
+			panic("invalid label in register")
 		}
-		panic("invalid label in register")
 	}
 	panic("invalid goto expression ")
 }
@@ -300,6 +301,10 @@ func (m *Machine) makePrimitiveExpr(expr Expression) func() interface{} {
 	case "reg":
 		return func() interface{} {
 			return m.GetRegisterContent(expr[1])
+		}
+	case "label":
+		return func() interface{} {
+			return Label(expr[1])
 		}
 	default:
 		panic("invalid primitive expression")

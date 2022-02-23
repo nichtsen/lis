@@ -120,3 +120,26 @@ func TestGotoLabel(t *testing.T) {
 		t.Error("register A should store value number 2")
 	}
 }
+
+// TestGotoReg goto a register expression
+func TestGotoReg(t *testing.T) {
+	m := NewMachine(
+		[]string{"a", "continue"},
+		[][]string{
+			{"assign", "a", "number", "0"},
+			{"assign", "continue", "label", "next"},
+			{"goto", "reg", "continue"},
+			{"assign", "a", "op", "+", "number", "1", "reg", "a"},
+			{"next"},
+			{"assign", "a", "op", "+", "number", "2", "reg", "a"},
+		},
+		map[string]func(args ...interface{}) interface{}{
+			"==": equal,
+			"+":  add,
+		},
+	)
+	m.Start()
+	if m.GetRegisterContent("a").(int) != 2 {
+		t.Error("register A should store value number 2")
+	}
+}

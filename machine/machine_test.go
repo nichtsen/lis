@@ -12,7 +12,6 @@ var (
 	}
 	add = func(args ...interface{}) interface{} {
 		return args[0].(int) + args[1].(int)
-
 	}
 	multiply = func(args ...interface{}) interface{} {
 		return args[0].(int) * args[1].(int)
@@ -159,5 +158,44 @@ func TestStack(t *testing.T) {
 	m.Start()
 	if m.GetRegisterContent("a").(int) != 0 {
 		t.Error("register A should store value number 0")
+	}
+}
+
+func TestFactorial(t *testing.T) {
+	m := NewMachine(
+		[]string{"n", "val", "continue"},
+		[][]string{
+			{"save", "n"},
+			{"assign", "continue", "label", "end"},
+			{"save", "continue"},
+			{"fact-loop"},
+			{"test", "op", "==", "reg", "n", "number", "1"},
+			{"branch", "label", "exit"},
+			{"assign", "n", "op", "+", "reg", "n", "number", "-1"},
+			{"assign", "continue", "label", "after-fact"},
+			{"save", "n"},
+			{"save", "continue"},
+			// recursive process
+			{"goto", "label", "fact-loop"},
+			{"exit"},
+			{"assign", "val", "number", "1"},
+			{"goto", "label", "after-fact"},
+			{"after-fact"},
+			{"restore", "continue"},
+			{"restore", "n"},
+			{"assign", "val", "op", "*", "reg", "n", "reg", "val"},
+			{"goto", "reg", "continue"},
+			{"end"},
+		},
+		map[string]func(args ...interface{}) interface{}{
+			"==": equal,
+			"*":  multiply,
+			"+":  add,
+		},
+	)
+	m.SetRegisterContent("n", 5)
+	m.Start()
+	if v := m.GetRegisterContent("val").(int); v != 120 {
+		t.Errorf("register A should store value number 120, not %d", v)
 	}
 }

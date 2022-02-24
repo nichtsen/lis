@@ -41,12 +41,14 @@ func NewInstruction(text []string) *Instruction {
 	}
 }
 
-func AssignExpr(expr Expression) bool { return expr.Tag() == "assign" }
-func OpExpr(expr Expression) bool     { return expr.Tag() == "op" }
-func TestExpr(expr Expression) bool   { return expr.Tag() == "test" && OpExpr(expr.Rest()) }
-func BranchExpr(expr Expression) bool { return expr.Tag() == "branch" }
-func GotoExpr(expr Expression) bool   { return expr.Tag() == "goto" }
-func LabelExpr(expr Expression) bool  { return expr.Tag() == "label" }
-func RegExpr(expr Expression) bool    { return expr.Tag() == "reg" }
-func NumberExpr(expr Expression) bool { return expr.Tag() == "number" }
-func StringExpr(expr Expression) bool { return expr.Tag() == "string" }
+func AssignExpr(expr Expression) bool  { return expr.Tag() == "assign" }
+func OpExpr(expr Expression) bool      { return expr.Tag() == "op" }
+func TestExpr(expr Expression) bool    { return expr.Tag() == "test" && OpExpr(expr.Rest()) }
+func BranchExpr(expr Expression) bool  { return expr.Tag() == "branch" }
+func GotoExpr(expr Expression) bool    { return expr.Tag() == "goto" }
+func LabelExpr(expr Expression) bool   { return expr.Tag() == "label" }
+func RegExpr(expr Expression) bool     { return expr.Tag() == "reg" }
+func NumberExpr(expr Expression) bool  { return expr.Tag() == "number" }
+func StringExpr(expr Expression) bool  { return expr.Tag() == "string" }
+func SaveExpr(expr Expression) bool    { return expr.Tag() == "save" }
+func RestoreExpr(expr Expression) bool { return expr.Tag() == "restore" }

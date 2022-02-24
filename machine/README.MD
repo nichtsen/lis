@@ -10,11 +10,11 @@ assign save restore reg label test branch goto number string op perform
 ## 1. assign expression
 assign reg-expr {primitive-value | op-expr} 
 ## 2. save expression 
-save reg-expr
+save reg-key
 ## 3. restore expression
-restore reg-expr
+restore reg-key
 ## 4. reg expression
-reg reg-name
+reg reg-key
 ## 5. label expression
 label label-name
 ## 6. test expression

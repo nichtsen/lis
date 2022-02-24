@@ -11,10 +11,11 @@ var (
 
 	}
 	add = func(args ...interface{}) interface{} {
-		c := args[0].(int) + args[1].(int)
-		_ = c
 		return args[0].(int) + args[1].(int)
 
+	}
+	multiply = func(args ...interface{}) interface{} {
+		return args[0].(int) * args[1].(int)
 	}
 )
 
@@ -141,5 +142,22 @@ func TestGotoReg(t *testing.T) {
 	m.Start()
 	if m.GetRegisterContent("a").(int) != 2 {
 		t.Error("register A should store value number 2")
+	}
+}
+
+func TestStack(t *testing.T) {
+	m := NewMachine(
+		[]string{"a"},
+		[][]string{
+			{"assign", "a", "number", "0"},
+			{"save", "a"},
+			{"assign", "a", "number", "1"},
+			{"restore", "a"},
+		},
+		map[string]func(args ...interface{}) interface{}{},
+	)
+	m.Start()
+	if m.GetRegisterContent("a").(int) != 0 {
+		t.Error("register A should store value number 0")
 	}
 }

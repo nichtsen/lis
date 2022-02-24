@@ -103,6 +103,7 @@ func NewMachine(regs []string, text [][]string, ops map[string]func(...interface
 		insts: make([]*Instruction, 0),
 		ops:   ops,
 		flag:  NewRegister("flag"),
+		stack: NewStack(),
 	}
 	regTab := make(map[string]IRegister)
 	for _, r := range regs {
@@ -209,8 +210,30 @@ func (m *Machine) makeProc(inst *Instruction, labels map[Label][]*Instruction) f
 		return m.makeBranch(expr, labels)
 	case GotoExpr(expr):
 		return m.makeGoto(expr, labels)
+	case SaveExpr(expr):
+		return m.makeSave(expr)
+	case RestoreExpr(expr):
+		return m.makeRestore(expr)
 	default:
 		panic("invalid expression")
+	}
+}
+
+func (m *Machine) makeSave(expr Expression) func() {
+	arg := expr.Rest()
+	reg := m.GetRegister(arg[0])
+	return func() {
+		m.stack.Save(reg)
+		m.AdvancePc()
+	}
+}
+
+func (m *Machine) makeRestore(expr Expression) func() {
+	arg := expr.Rest()
+	reg := m.GetRegister(arg[0])
+	return func() {
+		m.stack.Restore(reg)
+		m.AdvancePc()
 	}
 }
 

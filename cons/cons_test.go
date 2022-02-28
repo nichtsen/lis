@@ -34,10 +34,7 @@ func TestListB(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	item2 := Cons(Cons("a", "b"), "c")
-	err := item2.SetCar(Cons("d", "e"))
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println(item2)
+	item := Cons(Cons("a", "b"), "c")
+	item.SetCar("a")
+	fmt.Println(item)
 }

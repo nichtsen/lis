@@ -9,212 +9,56 @@ var (
 	ErrInvalidItemType = errors.New("invalid item type")
 )
 
-type Item interface {
-	car() Item
-	cdr() Item
-	SetCar(interface{}) error
-	SetCdr(interface{}) error
+type ICons interface {
+	Car() interface{}
+	Cdr() interface{}
+	SetCar(interface{})
+	SetCdr(interface{})
 }
 
-func Cons(a, b interface{}) Item {
-	res := &item{
-		composed: true,
+func Cons(a, b interface{}) ICons {
+	return &item{
+		a: a,
+		b: b,
 	}
-	if val, ok := a.(string); ok {
-		res.a = &item{
-			composed: false,
-			val:      val,
-		}
-	} else if item, ok := a.(Item); ok {
-		res.a = item
-	} else {
-		return nil
-	}
-	if b == nil {
-		res.b = nil
-		return res
-	}
-
-	if val, ok := b.(string); ok {
-		res.b = &item{
-			composed: false,
-			val:      val,
-		}
-	} else if item, ok := b.(Item); ok {
-		res.b = item
-	} else {
-		return nil
-	}
-	return res
 }
 
-func ConsList(a, b interface{}) Item {
-	res := &lItem{
-		composed: true,
-	}
-	if val, ok := a.(string); ok {
-		res.a = &lItem{
-			composed: false,
-			val:      val,
-		}
-	} else if item, ok := a.(Item); ok {
-		res.a = item
-	} else {
-		return nil
-	}
-	if b == nil {
-		res.b = nil
-		return res
-	}
-
-	if val, ok := b.(string); ok {
-		res.b = &lItem{
-			composed: false,
-			val:      val,
-		}
-	} else if item, ok := b.(Item); ok {
-		res.b = item
-	} else {
-		return nil
-	}
-	return res
+func Car(i ICons) interface{} {
+	return i.Car()
 }
 
-func Car(i Item) Item {
-	return i.car()
-}
-
-func Cdr(i Item) Item {
-	return i.cdr()
+func Cdr(i ICons) interface{} {
+	return i.Cdr()
 }
 
 type item struct {
-	a        Item
-	b        Item
-	composed bool
-	val      string
+	a interface{}
+	b interface{}
 }
 
 func (i *item) String() string {
-	if i.composed {
-		if i.b == nil {
-			return fmt.Sprintf("(%v)", i.a)
-		}
-		return fmt.Sprintf("(%v, %v)", i.a, i.b)
-	}
-	return i.val
+	return fmt.Sprintf("(%v, %v)", i.a, i.b)
 }
 
-func (i *item) car() Item {
+func (i *item) Car() interface{} {
 	return i.a
 }
 
-func (i *item) cdr() Item {
+func (i *item) Cdr() interface{} {
 	return i.b
 }
 
-func (i *item) SetCar(val interface{}) error {
-	if val, ok := val.(string); ok {
-		i.a = &item{
-			composed: false,
-			val:      val,
-		}
-		return nil
-	}
-	if item, ok := val.(Item); ok {
-		i.a = item
-		return nil
-	}
-	return ErrInvalidItemType
+func (i *item) SetCar(val interface{}) {
+	i.a = val
 }
 
-func (i *item) SetCdr(val interface{}) error {
-	if val, ok := val.(string); ok {
-		i.a = &item{
-			composed: false,
-			val:      val,
-		}
-		return nil
-	}
-	if item, ok := val.(Item); ok {
-		i.b = item
-		return nil
-	}
-	return ErrInvalidItemType
+func (i *item) SetCdr(val interface{}) {
+	i.b = val
 }
 
-type lItem struct {
-	a        Item
-	b        Item
-	composed bool
-	val      string
-}
-
-func (i *lItem) String() string {
-	if !i.composed {
-		return fmt.Sprintf("%v", i.val)
+func List(args ...interface{}) ICons {
+	if len(args) == 1 {
+		return Cons(args[0], nil)
 	}
-	var str string
-	i.traversals(&str)
-	return fmt.Sprintf("(%s)", str)
-}
-
-func (i *lItem) traversals(str *string) {
-	*str += fmt.Sprintf(" %v", i.a)
-
-	if i.b != nil {
-		if l, ok := i.b.(*lItem); ok {
-			l.traversals(str)
-		}
-	}
-}
-
-func (i *lItem) car() Item {
-	return i.a
-}
-
-func (i *lItem) cdr() Item {
-	return i.b
-}
-
-func (i *lItem) SetCar(val interface{}) error {
-	if val, ok := val.(string); ok {
-		i.a = &lItem{
-			composed: false,
-			val:      val,
-		}
-		return nil
-	}
-	if item, ok := val.(Item); ok {
-		i.a = item
-		return nil
-	}
-	return ErrInvalidItemType
-}
-
-func (i *lItem) SetCdr(val interface{}) error {
-	if val, ok := val.(string); ok {
-		i.a = &lItem{
-			composed: false,
-			val:      val,
-		}
-		return nil
-	}
-	if item, ok := val.(Item); ok {
-		i.b = item
-		return nil
-	}
-	return ErrInvalidItemType
-}
-
-func List(params ...interface{}) Item {
-	return list(0, params...)
-}
-
-func list(idx int, params ...interface{}) Item {
-	// exit of recursion
-	if idx == len(params)-1 {
-		return ConsList(params[idx], nil)
-	}
-	return ConsList(params[idx], list(idx+1, params...))
+	return Cons(args[0], List(args[1:]...))
 }

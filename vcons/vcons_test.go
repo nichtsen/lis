@@ -1,4 +1,4 @@
-package machine
+package vcons
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 )
 
 func TestList01(t *testing.T) {
-	l := Cons(5, Cons(3, Cons(2, Cons(1, Cons(1, Empty)))))
-	ls := Cons("a", Cons("b", Cons("c", Empty)))
+	l := Cons(5, Cons(3, Cons(2, Cons(1, Cons(1, Null)))))
+	ls := Cons("a", Cons("b", Cons("c", Null)))
 	callbackl := func(i interface{}) {
 		if n, ok := i.(int); !ok {
 			t.Error("invalid content type")
@@ -27,4 +27,15 @@ func TestList01(t *testing.T) {
 	}
 	Map(l, callbackl)
 	Map(ls, callbackls)
+}
+
+func ExampleList() {
+	l := Cons(5, Cons(3, Cons(2, Cons(1, Cons(1, Null)))))
+	ls := Cons("a", Cons("b", Cons("c", Null)))
+	fmt.Print(l)
+	fmt.Println("")
+	fmt.Print(ls)
+	//Output:
+	// (5, (3, (2, (1, (1, nil)))))
+	// (a, (b, (c, nil)))
 }

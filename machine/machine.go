@@ -3,6 +3,8 @@ package machine
 import (
 	"container/list"
 	"strconv"
+
+	c "github.com/nichtsen/lis/vcons"
 )
 
 // IRegister is the storage element of a machine
@@ -57,28 +59,27 @@ func (s *lStack) Restore() IRegister {
 }
 
 type mStack struct {
-	ePointer interface{}
+	cons interface{}
 }
 
 func (s *mStack) Save(r IRegister) {
-	s.ePointer = Cons(r.Get(), s.ePointer)
+	s.cons = c.Cons(r.Get(), s.cons)
 }
 
 func (s *mStack) Restore(r IRegister) {
-	val := Car(s.ePointer)
+	val := c.Car(s.cons)
 	defer func() {
-		s.ePointer = Cdr(s.ePointer)
+		s.cons = c.Cdr(s.cons)
 	}()
 	r.Set(val)
 }
 
 func (s *mStack) Init() {
-	s.ePointer = Empty
+	s.cons = c.Null
 }
 
 func (s *mStack) Empty() bool {
-	_, ok := s.ePointer.(emptyPtr)
-	return ok
+	return c.Empty(s.cons)
 }
 
 func NewStack() Stack {

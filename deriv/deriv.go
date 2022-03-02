@@ -210,7 +210,7 @@ func (d *Differentiation) MakeSum(exprA, exprB []*token) []*token {
 	res = append(res, exprA...)
 	res = append(res,
 		&token{
-			typ:  product_t,
+			typ:  sum_t,
 			char: []rune{'+'},
 		},
 	)

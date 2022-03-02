@@ -20,24 +20,31 @@ func TestInit(t *testing.T) {
 	fmt.Println(string(d.mergeTokens()))
 }
 
-func TestDeriv(t *testing.T) {
+func ExampleDifferentiation() {
 	expr := "* 3 x"
 	expr1 := "+ (* 3 x) x"
 	expr2 := "+ (* 3 x) (* x x)"
 	d := new(Differentiation)
 	res, err := d.Deriv(expr, 'x')
 	if err != nil {
-		t.Error(res)
+		fmt.Print(err)
+		return
 	}
 	res2, err := d.Deriv(expr1, 'x')
 	if err != nil {
-		t.Error(res)
+		fmt.Print(err)
+		return
 	}
 	res3, err := d.Deriv(expr2, 'x')
 	if err != nil {
-		t.Error(res)
+		fmt.Print(err)
+		return
 	}
 	fmt.Println(res)
 	fmt.Println(res2)
 	fmt.Println(res3)
+	// Output:
+	// 3*1+0*x
+	// 3*1+0*x+1
+	// 3*1+0*x+x*1+1*x
 }

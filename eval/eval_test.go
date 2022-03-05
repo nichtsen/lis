@@ -95,3 +95,34 @@ func TestEvalIf02(t *testing.T) {
 		t.Errorf("expected to be 2, not %v", val)
 	}
 }
+
+func TestEvalSymbol(t *testing.T) {
+	InitGlobal()
+	text := `define a 'hello a`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != "hello" {
+		t.Errorf("expected to be hello, not %v", val)
+	}
+}
+
+func TestLambda01(t *testing.T) {
+	InitGlobal()
+	text := `define square 'undefined set square lambda(a) { *(a,a) } square(2)  `
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 4 {
+		t.Errorf("expected to be 4, not %v", val)
+	}
+}
+
+func TestLambda02(t *testing.T) {
+	InitGlobal()
+	// double is a procedure that return a procedure
+	text := `define double(s) { lambda(prefix) { append(prefix,append(s,s)) } } define proc double('z)  proc('doublez:)`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != "doublez:zz" {
+		t.Errorf("expected to be \"doublez:zz\", not %v", val)
+	}
+}

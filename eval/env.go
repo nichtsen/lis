@@ -11,9 +11,11 @@ func init() {
 func InitGlobal() {
 	GlobalEnv = &Environment{
 		Frame: Frame{
-			"+":  Procedure(Add),
-			"==": Procedure(Equal),
-			">":  Procedure(Larger),
+			"+":      Procedure(Add),
+			"*":      Procedure(Multiply),
+			"==":     Procedure(Equal),
+			">":      Procedure(Larger),
+			"append": Procedure(Append),
 		},
 		Enclose: nil,
 	}
@@ -23,12 +25,20 @@ func Add(args ...interface{}) interface{} {
 	return args[0].(int) + args[1].(int)
 }
 
+func Append(args ...interface{}) interface{} {
+	return args[0].(string) + args[1].(string)
+}
+
 func Equal(args ...interface{}) interface{} {
 	return args[0].(int) == args[1].(int)
 }
 
 func Larger(args ...interface{}) interface{} {
 	return args[0].(int) > args[1].(int)
+}
+
+func Multiply(args ...interface{}) interface{} {
+	return args[0].(int) * args[0].(int)
 }
 
 type Frame map[string]interface{}

@@ -15,7 +15,9 @@ func MakeExpr(text string) *Expression {
 
 func DefineExpr(expr Expression) bool { return expr[0] == "define" }
 func AssignExpr(expr Expression) bool { return expr[0] == "set" }
-func LambdaExpr(expr Expression) bool { return expr[0] == "lambda" }
+func LambdaExpr(expr Expression) bool {
+	return strings.HasPrefix(expr[0], "lambda") && ProcedureExpr(expr)
+}
 func IfExpr(expr Expression) bool     { return expr[0] == "if" }
 func NumberExpr(expr Expression) bool { return strings.IndexFunc(expr[0], unicode.IsNumber) == 0 }
 func SymbolExpr(expr Expression) bool { return strings.IndexRune(expr[0], '\'') == 0 }
@@ -23,11 +25,48 @@ func ApplicationExpr(expr Expression) bool {
 	return strings.LastIndex(expr[0], ")") == len(expr[0])-1 && strings.IndexRune(expr[0], '(') > 0
 }
 func ApplicationaParas(expr Expression) []Expression {
+
 	idx := strings.IndexRune(expr[0], '(')
-	args := strings.Split(strings.Trim(expr[0][idx:], "()"), ",")
+	paraStr := strings.TrimSuffix(strings.TrimPrefix(expr[0][idx:], "("), ")")
+
+	var args []string
+	// inner Prodedure
+	if strings.ContainsAny(paraStr, "()") {
+		args = innerParas(strings.Split(paraStr, ","))
+	} else {
+		args = strings.Split(paraStr, ",")
+	}
+
 	res := make([]Expression, len(args))
 	for idx, arg := range args {
 		res[idx] = []string{arg}
+	}
+	return res
+}
+
+func innerParas(strs []string) []string {
+	res := make([]string, 0)
+	var count int
+	var scan int
+	for idx, str := range strs {
+		if count > 0 {
+			res[scan] = res[scan] + "," + strs[idx]
+		}
+		if count == 0 {
+			res = append(res, strs[idx])
+		}
+		if count < 0 {
+			panic(fmt.Sprintf("unclosed parenthese: %v", strs))
+		}
+		if strings.Index(str, "(") > 0 {
+			if count == 0 {
+				scan = idx
+			}
+			count++
+		}
+		if strings.Index(str, ")") > 0 {
+			count--
+		}
 	}
 	return res
 }

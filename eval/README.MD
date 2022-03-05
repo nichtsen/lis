@@ -1,5 +1,5 @@
 # eval
-evaluator of scheme expressions 
+A tiny evaluator of scheme expressions  
 
 ## expression
 - define
@@ -24,9 +24,11 @@ if predict-expr
     "}"
 
 ```
-- sequence
-- variable
 - lambda
+```
+lambda([arg,]) { expr [,expr] }
+```
+
 - application
 ```
 proc-name"("[,para]")" 

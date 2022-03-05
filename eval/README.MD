@@ -37,3 +37,18 @@ Core of evaluator is interleaving of `eval` and `apply` loop. Everytime eval enc
 application it call apply to make acctual calling.
 A compound procedure is a sequence of expression to be evaluated 
 within a given environment.
+
+## Example 
+compute fibonacci with evaluator:
+```eval
+Eval-go INPUT:
+define fib(n) { 
+    if ==(n,0) { 0 } 
+    if ==(n,1) { 1 } 
+    +(fib(-(n,1)),fib(-(n,2))) 
+    };
+Eval-go INPUT:
+fib(10);
+Eval-go OUTPUT:
+ 55 
+```

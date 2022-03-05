@@ -11,34 +11,39 @@ func init() {
 func InitGlobal() {
 	GlobalEnv = &Environment{
 		Frame: Frame{
-			"+":      Procedure(Add),
-			"*":      Procedure(Multiply),
-			"==":     Procedure(Equal),
-			">":      Procedure(Larger),
-			"append": Procedure(Append),
+			"+":      Procedure(add),
+			"-":      Procedure(substract),
+			"*":      Procedure(multiply),
+			"==":     Procedure(equal),
+			">":      Procedure(larger),
+			"append": Procedure(sappend),
 		},
 		Enclose: nil,
 	}
 }
 
-func Add(args ...interface{}) interface{} {
+func add(args ...interface{}) interface{} {
 	return args[0].(int) + args[1].(int)
 }
 
-func Append(args ...interface{}) interface{} {
+func sappend(args ...interface{}) interface{} {
 	return args[0].(string) + args[1].(string)
 }
 
-func Equal(args ...interface{}) interface{} {
+func equal(args ...interface{}) interface{} {
 	return args[0].(int) == args[1].(int)
 }
 
-func Larger(args ...interface{}) interface{} {
+func larger(args ...interface{}) interface{} {
 	return args[0].(int) > args[1].(int)
 }
 
-func Multiply(args ...interface{}) interface{} {
-	return args[0].(int) * args[0].(int)
+func multiply(args ...interface{}) interface{} {
+	return args[0].(int) * args[1].(int)
+}
+
+func substract(args ...interface{}) interface{} {
+	return args[0].(int) - args[1].(int)
 }
 
 type Frame map[string]interface{}

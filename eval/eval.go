@@ -15,7 +15,11 @@ func Eval(e *Expression, env *Environment) interface{} {
 		case LambdaExpr(expr):
 			continue
 		case IfExpr(expr):
-			continue
+			val, ifContinue := EvalIf(e, env)
+			if !ifContinue {
+				return val
+			}
+
 		case NumberExpr(expr):
 			n, _ := strconv.Atoi(expr[0])
 			*e = expr[1:]
@@ -24,6 +28,9 @@ func Eval(e *Expression, env *Environment) interface{} {
 			return expr[0][1:]
 		case ApplicationExpr(expr):
 			ae := ApplicationName(expr)
+			defer func() {
+				*e = (*e)[1:]
+			}()
 			return Apply(Eval(&ae, env), EvalArgs(ApplicationaParas(expr), env)...)
 		default:
 			val := env.LookUpVariable(expr[0])
@@ -44,7 +51,7 @@ func EvalArgs(exprs []Expression, env *Environment) []interface{} {
 
 func Apply(app interface{}, args ...interface{}) interface{} {
 	if IsPrimitive(app) {
-		Primitive(app)(args...)
+		return Primitive(app)(args...)
 	}
 	if IsCompound(app) {
 		cp := Compound(app)
@@ -78,4 +85,24 @@ func EvalAssign(e *Expression, env *Environment) {
 	va := (*e)[1]
 	*e = (*e)[2:]
 	env.SetVariable(va, Eval(e, env))
+}
+
+func EvalIf(e *Expression, env *Environment) (interface{}, bool) {
+	*e = (*e)[1:]
+	val := Eval(e, env)
+	v, ok := val.(bool)
+	if !ok {
+		panic(fmt.Sprintf("Invalid Prediction, %v", v))
+	}
+	csq, idx := IfBody(*e)
+	defer func() {
+		*e = (*e)[idx:]
+	}()
+	if v {
+		val := Eval(&csq, env)
+		if val != nil {
+			return val, false
+		}
+	}
+	return nil, true
 }

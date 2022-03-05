@@ -26,6 +26,7 @@ func ExampleEnvironment() {
 }
 
 func TestProdedureExpr(t *testing.T) {
+	InitGlobal()
 	expr := Expression([]string{"foo(a,b,c)", "{", "set", "a", "1", "a+b+c", "}"})
 	if !ProcedureExpr(expr) {
 		t.Error("failed prediction of procedure expression")
@@ -49,7 +50,25 @@ func TestProdedureExpr(t *testing.T) {
 }
 
 func TestEval01(t *testing.T) {
+	InitGlobal()
 	text := `define b 1 b`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 1 {
+		t.Errorf("expected to be 1, not %v", val)
+	}
+
+	text = `set b 2 b`
+	expr = MakeExpr(text)
+	val = Eval(expr, GlobalEnv)
+	if val != 2 {
+		t.Errorf("expected to be 2, not %v", val)
+	}
+}
+
+func TestEval02(t *testing.T) {
+	InitGlobal()
+	text := `define a 1 define foo(v) { v } foo(a) `
 	expr := MakeExpr(text)
 	val := Eval(expr, GlobalEnv)
 	if val != 1 {
@@ -57,11 +76,22 @@ func TestEval01(t *testing.T) {
 	}
 }
 
-func TestEval02(t *testing.T) {
-	text := `define a 1 define foo(v) { v } foo(a) `
+func TestEvalIf01(t *testing.T) {
+	InitGlobal()
+	text := `define a 1 define b 2 if >(b,a) { b } a `
 	expr := MakeExpr(text)
 	val := Eval(expr, GlobalEnv)
-	if val != 1 {
-		t.Errorf("expected to be 1, not %v", val)
+	if val != 2 {
+		t.Errorf("expected to be 2, not %v", val)
+	}
+}
+
+func TestEvalIf02(t *testing.T) {
+	InitGlobal()
+	text := `define a 2 define b 1 if >(b,a) { b } a `
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 2 {
+		t.Errorf("expected to be 2, not %v", val)
 	}
 }

@@ -2,15 +2,33 @@ package eval
 
 import "fmt"
 
-var GlobalEnv = &Environment{
-	Frame: Frame{
-		"+": Add,
-	},
-	Enclose: nil,
+var GlobalEnv *Environment
+
+func init() {
+	InitGlobal()
+}
+
+func InitGlobal() {
+	GlobalEnv = &Environment{
+		Frame: Frame{
+			"+":  Procedure(Add),
+			"==": Procedure(Equal),
+			">":  Procedure(Larger),
+		},
+		Enclose: nil,
+	}
 }
 
 func Add(args ...interface{}) interface{} {
 	return args[0].(int) + args[1].(int)
+}
+
+func Equal(args ...interface{}) interface{} {
+	return args[0].(int) == args[1].(int)
+}
+
+func Larger(args ...interface{}) interface{} {
+	return args[0].(int) > args[1].(int)
 }
 
 type Frame map[string]interface{}

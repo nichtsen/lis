@@ -55,6 +55,11 @@ func ProcedureBody(expr Expression) (Expression, int) {
 	return val, idx + 2
 }
 
+func IfBody(expr Expression) (Expression, int) {
+	val, idx := NextBlock(expr)
+	return val, idx + 1
+}
+
 func (e Expression) Rest() Expression {
 	return e[1:]
 }

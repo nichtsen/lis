@@ -60,7 +60,7 @@ func innerParas(strs []string) []string {
 		}
 		if strings.Index(str, "(") > 0 {
 			if count == 0 {
-				scan = idx
+				scan = len(res) - 1
 			}
 			count++
 		}

@@ -126,3 +126,42 @@ func TestLambda02(t *testing.T) {
 		t.Errorf("expected to be \"doublez:zz\", not %v", val)
 	}
 }
+
+func TestFactorial01(t *testing.T) {
+	InitGlobal()
+	// double is a procedure that return a procedure
+	text := `define fact(n) { if ==(n,1) { 1 } define tmp -(n,1) *(n,fact(tmp)) } fact(3)`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 6 {
+		t.Errorf("expected to be 6, not %v", val)
+	}
+}
+
+func TestFactorial02(t *testing.T) {
+	InitGlobal()
+	// double is a procedure that return a procedure
+	text := `define fact(n) { if ==(n,1) { 1 } *(n,fact(-(n,1))) } fact(3)`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 6 {
+		t.Errorf("expected to be 6, not %v", val)
+	}
+}
+
+func TestFibonacci(t *testing.T) {
+	InitGlobal()
+	// double is a procedure that return a procedure
+	text := `
+	   define fib(n) { 
+		   if ==(n,0) { 0 } 
+		   if ==(n,1) { 1 } 
+		   +(fib(-(n,1)),fib(-(n,2))) 
+		   };
+		fib(6) `
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 8 {
+		t.Errorf("expected to be 8, not %v", val)
+	}
+}

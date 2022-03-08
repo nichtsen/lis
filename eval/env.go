@@ -1,6 +1,10 @@
 package eval
 
-import "fmt"
+import (
+	"fmt"
+
+	c "github.com/nichtsen/lis/vcons"
+)
 
 var GlobalEnv *Environment
 
@@ -11,12 +15,19 @@ func init() {
 func InitGlobal() {
 	GlobalEnv = &Environment{
 		Frame: Frame{
-			"+":      Procedure(add),
-			"-":      Procedure(substract),
-			"*":      Procedure(multiply),
-			"==":     Procedure(equal),
-			">":      Procedure(larger),
-			"append": Procedure(sappend),
+			"+":         Procedure(add),
+			"-":         Procedure(substract),
+			"*":         Procedure(multiply),
+			"==":        Procedure(equal),
+			">":         Procedure(larger),
+			"append":    Procedure(sappend),
+			"cons":      Procedure(cons),
+			"car":       Procedure(car),
+			"cdr":       Procedure(cdr),
+			"list":      Procedure(list),
+			"null?":     Procedure(isNull),
+			"not-null?": Procedure(isNotNull),
+			"print":     Procedure(print),
 		},
 		Enclose: nil,
 	}
@@ -44,6 +55,37 @@ func multiply(args ...interface{}) interface{} {
 
 func substract(args ...interface{}) interface{} {
 	return args[0].(int) - args[1].(int)
+}
+
+func cons(args ...interface{}) interface{} {
+	return c.Cons(args[0], args[1])
+}
+
+func car(args ...interface{}) interface{} {
+	return c.Car(args[0])
+}
+
+func cdr(args ...interface{}) interface{} {
+	return c.Cdr(args[0])
+}
+
+func list(args ...interface{}) interface{} {
+	return c.List(args...)
+}
+
+func isNull(args ...interface{}) interface{} {
+	return c.Empty(args[0])
+}
+
+func isNotNull(args ...interface{}) interface{} {
+	return !c.Empty(args[0])
+}
+
+func print(args ...interface{}) interface{} {
+	for _, arg := range args {
+		fmt.Print(arg)
+	}
+	return nil
 }
 
 type Frame map[string]interface{}

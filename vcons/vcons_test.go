@@ -29,7 +29,7 @@ func TestList01(t *testing.T) {
 	Map(ls, callbackls)
 }
 
-func ExampleList() {
+func ExampleCons() {
 	l := Cons(5, Cons(3, Cons(2, Cons(1, Cons(1, Null)))))
 	ls := Cons("a", Cons("b", Cons("c", Null)))
 	fmt.Print(l)
@@ -38,4 +38,15 @@ func ExampleList() {
 	//Output:
 	// (5, (3, (2, (1, (1, nil)))))
 	// (a, (b, (c, nil)))
+}
+
+func ExampleList() {
+	l := List("a", "b", "c")
+	for cur := interface{}(l); !Empty(cur); cur = Cdr(cur) {
+		fmt.Println(Car(cur))
+	}
+	//Output:
+	// a
+	// b
+	// c
 }

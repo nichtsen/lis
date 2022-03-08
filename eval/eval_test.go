@@ -129,7 +129,6 @@ func TestLambda02(t *testing.T) {
 
 func TestFactorial01(t *testing.T) {
 	InitGlobal()
-	// double is a procedure that return a procedure
 	text := `define fact(n) { if ==(n,1) { 1 } define tmp -(n,1) *(n,fact(tmp)) } fact(3)`
 	expr := MakeExpr(text)
 	val := Eval(expr, GlobalEnv)
@@ -140,7 +139,6 @@ func TestFactorial01(t *testing.T) {
 
 func TestFactorial02(t *testing.T) {
 	InitGlobal()
-	// double is a procedure that return a procedure
 	text := `define fact(n) { if ==(n,1) { 1 } *(n,fact(-(n,1))) } fact(3)`
 	expr := MakeExpr(text)
 	val := Eval(expr, GlobalEnv)
@@ -151,7 +149,6 @@ func TestFactorial02(t *testing.T) {
 
 func TestFibonacci(t *testing.T) {
 	InitGlobal()
-	// double is a procedure that return a procedure
 	text := `
 	   define fib(n) { 
 		   if ==(n,0) { 0 } 
@@ -163,5 +160,17 @@ func TestFibonacci(t *testing.T) {
 	val := Eval(expr, GlobalEnv)
 	if val != 8 {
 		t.Errorf("expected to be 8, not %v", val)
+	}
+}
+
+func TestCons01(t *testing.T) {
+	InitGlobal()
+	text := `
+	   define a cons('a,'b)
+	   car(a) `
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != "a" {
+		t.Errorf("expected to be a, not %v", val)
 	}
 }

@@ -174,3 +174,42 @@ func TestCons01(t *testing.T) {
 		t.Errorf("expected to be a, not %v", val)
 	}
 }
+
+func ExamplePerformExpr() {
+	InitGlobal()
+	text := `
+	   define l list('a,'b,'c)
+	   define printlist(l) {
+		   perform print(car(l))
+		   if not-null?(cdr(l)) {
+				printlist(cdr(l))
+		   }
+	   }
+	 	printlist(l)  
+	   `
+	expr := MakeExpr(text)
+	Eval(expr, GlobalEnv)
+	//output:
+	// abc
+}
+
+func ExampleList() {
+	InitGlobal()
+	text := `
+	   define tab list(list(1,'a),list(2,'b),list(3,'c))
+	   define printlist(l) {
+		   define cur car(l)
+		   perform print(car(cur))
+		   perform print(car(cdr(cur)))
+		   if not-null?(cdr(l)) {
+				printlist(cdr(l))
+		   }
+	   }
+	 	printlist(tab)
+	   `
+	expr := MakeExpr(text)
+	Eval(expr, GlobalEnv)
+	// Output:
+	// 1a2b3c
+
+}

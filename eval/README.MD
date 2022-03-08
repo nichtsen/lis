@@ -2,7 +2,7 @@
 A tiny evaluator of scheme expressions  
 
 ## expression
-- define
+- define-expr
 ```
 define { 
     var value-expr | 
@@ -12,11 +12,11 @@ define {
     "}" 
 }
 ```
-- assign
+- assign-expr
 ```
 set var value-expr
 ```
-- if
+- if-expr
 ```
 if predict-expr
     "{" 
@@ -24,14 +24,18 @@ if predict-expr
     "}"
 
 ```
-- lambda
+- lambda-expr
 ```
 lambda([arg,]) { expr [,expr] }
 ```
 
-- application
+- application-expr
 ```
 proc-name"("[,para]")" 
+```
+- perform-expr
+```
+perform application-expr
 ```
 
 ## Remark

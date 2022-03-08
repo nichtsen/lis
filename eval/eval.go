@@ -28,10 +28,13 @@ func Eval(e *Expression, env *Environment) interface{} {
 			return expr[0][1:]
 		case ApplicationExpr(expr):
 			ae := ApplicationName(expr)
-			defer func() {
-				*e = (*e)[1:]
-			}()
+			*e = (*e)[1:]
 			return Apply(Eval(&ae, env), EvalArgs(ApplicationaParas(expr), env)...)
+		case PerformExpr(expr):
+			expr = expr[1:]
+			ae := ApplicationName(expr)
+			*e = (*e)[2:]
+			Apply(Eval(&ae, env), EvalArgs(ApplicationaParas(expr), env)...)
 		default:
 			val := env.LookUpVariable(expr[0])
 			*e = expr[1:]

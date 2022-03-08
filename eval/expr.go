@@ -28,7 +28,9 @@ func ApplicationaParas(expr Expression) []Expression {
 
 	idx := strings.IndexRune(expr[0], '(')
 	paraStr := strings.TrimSuffix(strings.TrimPrefix(expr[0][idx:], "("), ")")
-
+	if paraStr == "" {
+		return make([]Expression, 0)
+	}
 	var args []string
 	// inner Prodedure
 	if strings.ContainsAny(paraStr, "()") {
@@ -92,6 +94,10 @@ func ProcedureParas(expr Expression) []string {
 func ProcedureBody(expr Expression) (Expression, int) {
 	val, idx := NextBlock(expr[1:])
 	return val, idx + 2
+}
+
+func PerformExpr(expr Expression) bool {
+	return expr[0] == "perform" && len(expr) > 1 && ApplicationExpr(expr[1:])
 }
 
 func IfBody(expr Expression) (Expression, int) {

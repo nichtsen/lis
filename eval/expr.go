@@ -9,7 +9,17 @@ import (
 type Expression []string
 
 func MakeExpr(text string) *Expression {
-	val := Expression(strings.Fields(strings.ReplaceAll(text, ";", " ")))
+	val := Expression(
+		strings.Fields(
+			strings.ReplaceAll(
+				strings.ReplaceAll(
+					strings.ReplaceAll(text, ";", " "),
+					"{", " { ",
+				),
+				"}", " } ",
+			),
+		),
+	)
 	return &val
 }
 

@@ -49,6 +49,17 @@ func TestProdedureExpr(t *testing.T) {
 	}
 }
 
+func TestBraces(t *testing.T) {
+	InitGlobal()
+	text := `define foo(a){{+(a,1)} }`
+	expr := MakeExpr(text)
+	val := fmt.Sprintf("%s", *expr)
+	expected := "[define foo(a) { { +(a,1) } }]"
+	if val != expected {
+		t.Errorf("expected to be %v, not %v", expected, val)
+	}
+}
+
 func TestEval01(t *testing.T) {
 	InitGlobal()
 	text := `define b 1 b`

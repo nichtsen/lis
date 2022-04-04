@@ -27,7 +27,7 @@ func ExampleEnvironment() {
 
 func TestProdedureExpr(t *testing.T) {
 	InitGlobal()
-	expr := Expression([]string{"foo(a,b,c)", "{", "set", "a", "1", "a+b+c", "}"})
+	expr := Expression([]string{"foo", "(", "a,b,c", ")", "{", "set", "a", "1", "a+b+c", "}"})
 	if !ProcedureExpr(expr) {
 		t.Error("failed prediction of procedure expression")
 	}
@@ -35,14 +35,14 @@ func TestProdedureExpr(t *testing.T) {
 	if va != "foo" {
 		t.Errorf("expected \"foo\", got %v", va)
 	}
-	paras := ProcedureParas(expr)
+	paras, idx := ProcedureParas(expr)
 	ep := []string{"a", "b", "c"}
 	if !reflect.DeepEqual(paras, ep) {
 		t.Errorf("expected to be equal, %v vs %v", paras, ep)
 	}
 
-	eb := expr[2:6]
-	body, _ := ProcedureBody(expr)
+	eb := expr[5:9]
+	body, _ := ProcedureBody(expr[idx:])
 
 	if !reflect.DeepEqual(body, eb) {
 		t.Errorf("expected to be equal, %v vs %v", body, eb)
@@ -54,7 +54,7 @@ func TestBraces(t *testing.T) {
 	text := `define foo(a){{+(a,1)} }`
 	expr := MakeExpr(text)
 	val := fmt.Sprintf("%s", *expr)
-	expected := "[define foo(a) { { +(a,1) } }]"
+	expected := "[define foo ( a ) { { + ( a , 1 ) } }]"
 	if val != expected {
 		t.Errorf("expected to be %v, not %v", expected, val)
 	}
@@ -138,6 +138,25 @@ func TestLambda02(t *testing.T) {
 	}
 }
 
+func TestLambda03(t *testing.T) {
+	InitGlobal()
+	text := `lambda(a){*(a,a)}(4)`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 16 {
+		t.Errorf("expected to be 16, not %v", val)
+	}
+}
+
+func TestLambda04(t *testing.T) {
+	InitGlobal()
+	text := `define square(a){*(a,a)} square(lambda(a){*(a,a)}(2))`
+	expr := MakeExpr(text)
+	val := Eval(expr, GlobalEnv)
+	if val != 16 {
+		t.Errorf("expected to be 16, not %v", val)
+	}
+}
 func TestFactorial01(t *testing.T) {
 	InitGlobal()
 	text := `define fact(n) { if ==(n,1) { 1 } define tmp -(n,1) *(n,fact(tmp)) } fact(3)`
@@ -161,9 +180,9 @@ func TestFactorial02(t *testing.T) {
 func TestFibonacci(t *testing.T) {
 	InitGlobal()
 	text := `
-	   define fib(n) { 
-		   if ==(n,0) { 0 } 
-		   if ==(n,1) { 1 } 
+	   define fib(n){ 
+		   if ==(n, 0) {0} 
+		   if ==(n, 1) {1} 
 		   +(fib(-(n,1)),fib(-(n,2))) 
 		   };
 		fib(6) `

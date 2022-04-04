@@ -4,13 +4,13 @@ A tiny evaluator of scheme expressions
 ## expression
 - define-expr
 ```
-define { 
+define "{" 
     var value-expr | 
     proc"(" [arg,] ")" 
     "{" 
          expr [, expr]
     "}" 
-}
+"}"
 ```
 - assign-expr
 ```
@@ -26,7 +26,7 @@ if predict-expr
 ```
 - lambda-expr
 ```
-lambda([arg,]) { expr [,expr] }
+lambda"("[arg,] ")" "{" expr [,expr] "}" ["(" [,para] ")"]
 ```
 
 - application-expr

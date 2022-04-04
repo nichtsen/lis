@@ -13,7 +13,14 @@ func Eval(e *Expression, env *Environment) interface{} {
 		case AssignExpr(expr):
 			EvalAssign(e, env)
 		case LambdaExpr(expr):
-			return EvalLambda(e, env)
+			val := EvalLambda(e, env)
+			exprNext := (*e)
+			if LambdaApplicationExpr(exprNext) {
+				paras, idx := ApplicationaParas(exprNext)
+				*e = (*e)[idx:]
+				return Apply(val, EvalArgs(paras, env)...)
+			}
+			return val
 		case IfExpr(expr):
 			val, ifContinue := EvalIf(e, env)
 			if !ifContinue {
@@ -29,12 +36,16 @@ func Eval(e *Expression, env *Environment) interface{} {
 		case ApplicationExpr(expr):
 			ae := ApplicationName(expr)
 			*e = (*e)[1:]
-			return Apply(Eval(&ae, env), EvalArgs(ApplicationaParas(expr), env)...)
+			paras, idx := ApplicationaParas(*e)
+			*e = (*e)[idx:]
+			return Apply(Eval(&ae, env), EvalArgs(paras, env)...)
 		case PerformExpr(expr):
 			expr = expr[1:]
 			ae := ApplicationName(expr)
 			*e = (*e)[2:]
-			Apply(Eval(&ae, env), EvalArgs(ApplicationaParas(expr), env)...)
+			paras, idx := ApplicationaParas(*e)
+			*e = (*e)[idx:]
+			Apply(Eval(&ae, env), EvalArgs(paras, env)...)
 		default:
 			val := env.LookUpVariable(expr[0])
 			*e = expr[1:]
@@ -65,9 +76,9 @@ func Apply(app interface{}, args ...interface{}) interface{} {
 }
 
 func makeLambda(e *Expression, env *Environment) CompoundProcedure {
-	expr := *e
-	paras := ProcedureParas(expr)
-	body, idx := ProcedureBody(expr)
+	paras, idx := ProcedureParas(*e)
+	*e = (*e)[idx:]
+	body, idx := ProcedureBody(*e)
 	cp := NewCompoundProdedure(paras, body, env)
 	*e = (*e)[idx:]
 	return cp

@@ -1,6 +1,8 @@
 # eval
 A tiny evaluator of scheme expressions  
 
+![demo](https://github.com/nichtsen/lis/raw/main/eval/img/demo.gif)
+
 ## expression
 - define-expr
 ```

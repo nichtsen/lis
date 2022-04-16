@@ -31,6 +31,7 @@ op operator-name {[,reg-expr] | [,number-expr] | [string-expr]}
 # Stages
 - assemble time
 - simulate time
+
 All instructions are evaluated during assemble time
 
 # Remark
